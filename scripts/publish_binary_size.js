@@ -117,7 +117,6 @@ function query(after) {
                 Body: JSON.stringify({"testKey": "testValue", "number": 2}),
                 Bucket: 'mapbox-loading-dock',
                 Key: 'raw/mobile_staging.binarysize/test_payload.json',
-                ACL: 'public-read',
                 CacheControl: 'max-age=300',
                 ContentEncoding: 'json',
                 ContentType: 'application/json'
