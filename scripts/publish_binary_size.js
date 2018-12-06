@@ -113,6 +113,9 @@ function query(after) {
         if (history.pageInfo.hasNextPage) {
             return query(history.pageInfo.endCursor);
         } else {
+          
+            console.log(JSON.stringify(rows));
+            
             var params = {
                 Body: JSON.stringify({"testKey": "testValue", "number": 2}),
                 Bucket: 'mapbox-loading-dock',
