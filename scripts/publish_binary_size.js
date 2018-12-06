@@ -113,14 +113,22 @@ function query(after) {
         if (history.pageInfo.hasNextPage) {
             return query(history.pageInfo.endCursor);
         } else {
-            return new AWS.S3({region: 'us-east-1'}).putObject({
+            var params = {
                 Body: JSON.stringify({"testKey": "testValue", "number": 2}),
                 Bucket: 'mapbox-loading-dock',
                 Key: 'raw/mobile_staging.binarysize/test_payload.json',
                 CacheControl: 'max-age=300',
                 ContentEncoding: 'json',
                 ContentType: 'application/json'
-            }).promise();
+            };
+            
+            return new AWS.S3({region: 'us-east-1'}).putObject(params, function (err, res) {
+              if (err) {
+                console.log("Error sending publishing metrics: ", err);
+              } else {
+                console.log("iOS binary size logged to S3 successfully")
+              }
+            });
         }
     });
 }
