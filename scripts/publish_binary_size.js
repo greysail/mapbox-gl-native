@@ -90,11 +90,15 @@ function query(after) {
             const commit = edge.node;
             // all checks that were run on a commit
             const suite = commit.checkSuites.nodes[0];
+            console.log("SUITE:");
+            console.log(JSON.stringify(suite));
 
             if (!suite)
                 continue;
 
             const runs = commit.checkSuites.nodes[0].checkRuns.nodes;
+            console.log("RUNS:");
+            console.log(JSON.stringify(runs));
             const row = [`${commit.oid.slice(0, 7)} - ${commit.messageHeadline}`];
             console.log("ROW:");
             console.log(row);
