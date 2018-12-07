@@ -98,8 +98,14 @@ function query(after) {
 
             for (let i = 0; i < platforms.length; i++) {
                 const {platform, arch} = platforms[i];
+                console.log("-------------platforms[i]-------------");
+                console.log(platforms[i])
+                console.log("--------------------------------------");
 
                 const run = runs.find((run) => {
+                    console.log("-------------run-------------");
+                    console.log(run)
+                    console.log("-----------------------------");
                     const [, p, a] = run.name.match(/Size - (\w+) ([\w-]+)/);
                     return platform === p && arch === a;
                 });
@@ -108,6 +114,9 @@ function query(after) {
             }
 
             rows.push(row);
+            console.log("-------------Single row:-------------");
+            console.log(JSON.stringify(row))
+            console.log("-------------------------------------");
         }
 
         if (history.pageInfo.hasNextPage) {
