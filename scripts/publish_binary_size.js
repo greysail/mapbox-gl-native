@@ -146,13 +146,13 @@ function query(after) {
 
 function uploadBinaryMetrics(platform, arch, size, commit, date) {
   
-  var payload = {
-        'sdk': 'maps',
-        'platform' : platform,
-        'arch': arch,
-        'size' : size
-        'created_at': date
-  };
+  // var payload = {
+  //       'sdk': 'maps',
+  //       'platform' : platform,
+  //       'arch': arch,
+  //       'size' : size
+  //       'created_at': date
+  // };
   
 }
 
