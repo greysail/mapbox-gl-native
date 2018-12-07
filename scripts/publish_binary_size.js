@@ -108,7 +108,7 @@ function query(after) {
                 });
                 
                 console.log("RUN:");
-                console.log(runs);
+                console.log(run);
 
                 row[i + 1] = run ? +run.summary.match(/is (\d+) bytes/)[1] : undefined;
             }
