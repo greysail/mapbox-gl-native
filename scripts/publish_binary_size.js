@@ -88,6 +88,7 @@ function query(after) {
 
         for (const edge of history.edges) {
             const commit = edge.node;
+            // all checks that were run on a commit
             const suite = commit.checkSuites.nodes[0];
 
             if (!suite)
@@ -95,35 +96,29 @@ function query(after) {
 
             const runs = commit.checkSuites.nodes[0].checkRuns.nodes;
             const row = [`${commit.oid.slice(0, 7)} - ${commit.messageHeadline}`];
+            console.log("ROW:");
+            console.log(row);
 
             for (let i = 0; i < platforms.length; i++) {
                 const {platform, arch} = platforms[i];
-                console.log("-------------platforms[i]-------------");
-                console.log(platforms[i])
-                console.log("--------------------------------------");
 
                 const run = runs.find((run) => {
-                    console.log("-------------run-------------");
-                    console.log(run)
-                    console.log("-----------------------------");
                     const [, p, a] = run.name.match(/Size - (\w+) ([\w-]+)/);
                     return platform === p && arch === a;
                 });
+                
+                console.log("RUN:");
+                console.log(runs);
 
                 row[i + 1] = run ? +run.summary.match(/is (\d+) bytes/)[1] : undefined;
             }
 
             rows.push(row);
-            console.log("-------------Single row:-------------");
-            console.log(JSON.stringify(row))
-            console.log("-------------------------------------");
         }
 
         if (history.pageInfo.hasNextPage) {
             return query(history.pageInfo.endCursor);
         } else {
-          
-            console.log(JSON.stringify(rows));
             
             var params = {
                 Body: JSON.stringify({"testKey": "testValue", "number": 2}),
@@ -143,6 +138,18 @@ function query(after) {
             });
         }
     });
+}
+
+function uploadBinaryMetrics(platform, arch, size, commit, date) {
+  
+  var payload = {
+        'sdk': 'maps',
+        'platform' : platform,
+        'arch': arch,
+        'size' : size
+        'created_at': date
+  };
+  
 }
 
 github.apps.createInstallationToken({installation_id: SIZE_CHECK_APP_INSTALLATION_ID})
