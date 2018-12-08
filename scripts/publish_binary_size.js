@@ -8,6 +8,9 @@ const AWS = require('aws-sdk');
 const SIZE_CHECK_APP_ID = 14028;
 const SIZE_CHECK_APP_INSTALLATION_ID = 229425;
 
+const date = new Date()
+const formattedDate = `${date.getFullYear()}-${date.getMonth()}-${date.getDay()}`
+
 process.on('unhandledRejection', error => {
     console.log(error);
     process.exit(1)
@@ -90,18 +93,12 @@ function query(after) {
             const commit = edge.node;
             // all checks that were run on a commit
             const suite = commit.checkSuites.nodes[0];
-            console.log("SUITE:");
-            console.log(JSON.stringify(suite));
 
             if (!suite)
                 continue;
 
             const runs = commit.checkSuites.nodes[0].checkRuns.nodes;
-            console.log("RUNS:");
-            console.log(JSON.stringify(runs));
             const row = [`${commit.oid.slice(0, 7)} - ${commit.messageHeadline}`];
-            console.log("ROW:");
-            console.log(row);
 
             for (let i = 0; i < platforms.length; i++) {
                 const {platform, arch} = platforms[i];
@@ -110,9 +107,6 @@ function query(after) {
                     const [, p, a] = run.name.match(/Size - (\w+) ([\w-]+)/);
                     return platform === p && arch === a;
                 });
-                
-                console.log("RUN:");
-                console.log(run);
 
                 row[i + 1] = run ? +run.summary.match(/is (\d+) bytes/)[1] : undefined;
             }
@@ -123,11 +117,19 @@ function query(after) {
         if (history.pageInfo.hasNextPage) {
             return query(history.pageInfo.endCursor);
         } else {
+          
+            var payload;
+
+            suite["checkRuns"]["nodes"].forEach(function(binaryMeasurement, index) {
+              payload.push(formatBinaryMetric(binaryMeasurement))
+            });
+            
+            console.log(payload);
             
             var params = {
-                Body: JSON.stringify({"testKey": "testValue", "number": 2}),
+                Body: JSON.stringify(payload),
                 Bucket: 'mapbox-loading-dock',
-                Key: 'raw/mobile_staging.binarysize/test_payload.json',
+                Key: `raw/mobile_staging.binarysize/${currentDate}/${process.env['CIRCLE_SHA1']}.json`,
                 CacheControl: 'max-age=300',
                 ContentEncoding: 'json',
                 ContentType: 'application/json'
@@ -144,16 +146,41 @@ function query(after) {
     });
 }
 
-function uploadBinaryMetrics(platform, arch, size, commit, date) {
+function formatBinaryMetric(item) {
+  var platform = item["name"].includes("iOS") ? 'iOS' : 'Android';
+  var size = item["title"].replace(/ MB/g,'');
+  var arch;
+
+  switch(true) {
+    case item["name"].includes("arm-v7") || item["name"].includes("armv7"):
+      arch = "arm-v7";
+      break;
+    case item["name"].includes("arm-v8"):
+      arch = "arm-v8";
+      break;
+    case item["name"].includes("x86"):
+      arch = "x86";
+      break;
+    case item["name"].includes("x86_64"):
+      arch = "x86_64";
+      break;
+    case item["name"].includes("AAR"):
+      arch = "AAR";
+      break;
+    case item["name"].includes("arm64"):
+      arch = "arm64";
+      break;
+    case item["name"].includes("Dynamic"):
+      arch = "Dynamic";
+      break;
+  }
   
-  // var payload = {
-  //       'sdk': 'maps',
-  //       'platform' : platform,
-  //       'arch': arch,
-  //       'size' : size
-  //       'created_at': date
-  // };
-  
+  return {
+      'sdk': 'maps',
+      'platform' : platform,
+      'arch': arch,
+      'size' : size
+  };
 }
 
 github.apps.createInstallationToken({installation_id: SIZE_CHECK_APP_INSTALLATION_ID})
